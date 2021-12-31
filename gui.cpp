@@ -262,8 +262,8 @@ int CameraStart()
 	int numCamera = 0;
 	int camIndex = 0;
     pthread_t  tid;
-	//char c;
-	//int done = FALSE;
+//	char c;
+//	int done = FALSE;
 	uint32_t macLow = 0; // Low 32-bits of the mac address (for file naming).
 	
 	//============================================================================
@@ -475,20 +475,18 @@ int CameraStart()
 					context.View = View;
 					context.camHandle = handle;
 					context.exit = FALSE;
-		   		pthread_create(&tid, NULL, ImageDisplayThread, &context); 
+		   			pthread_create(&tid, NULL, ImageDisplayThread, &context); 
 
-          // Call the main command loop or the example.
-          PrintMenu();
-
-	        return 0;
+          			// Call the main command loop or the example.
+          			PrintMenu();
+					return 0;
 #if 0
-          while(!done)
-          {
-		        c = GetKey();
-
-		            // Toggle turboMode
-            if ((c == 'T') || (c=='t'))
-            {
+        			while(!done)
+        			{
+		    			c = GetKey();
+						// Toggle turboMode
+            			if ((c == 'T') || (c=='t'))
+            			{
 							// See if TurboDrive is available.
 							turboDriveAvailable = IsTurboDriveAvailable(handle);
 							if (turboDriveAvailable)
@@ -511,21 +509,21 @@ int CameraStart()
 							{
 								printf("*** TurboDrive is NOT Available for this device/pixel format combination ***\n");
 							}
-            }
+            			}
 
-		            // Stop
-            if ((c == 'S') || (c=='s') || (c == '0'))
-            {
+		            	// Stop
+						if ((c == 'S') || (c=='s') || (c == '0'))
+						{
 							GevStopTransfer(handle);
-            }
-		            //Abort
-            if ((c == 'A') || (c=='a'))
-            {
-	 						GevAbortTransfer(handle);
 						}
-		            // Snap N (1 to 9 frames)
-            if ((c >= '1')&&(c<='9'))
-            {
+		            	//Abort
+						if ((c == 'A') || (c=='a'))
+						{
+							GevAbortTransfer(handle);
+						}
+						// Snap N (1 to 9 frames)
+						if ((c >= '1')&&(c<='9'))
+						{
 							for (i = 0; i < numBuffers; i++)
 							{
 								memset(bufAddress[i], 0, allocate_size);
@@ -534,20 +532,20 @@ int CameraStart()
 							status = GevStartTransfer( handle, (UINT32)(c-'0'));
 							if (status != 0) printf("Error starting grab - 0x%x  or %d\n", status, status); 
 						}
-		        // Continuous grab.
-            if ((c == 'G') || (c=='g'))
-            {
+						// Continuous grab.
+						if ((c == 'G') || (c=='g'))
+						{
 							for (i = 0; i < numBuffers; i++)
 							{
 								memset(bufAddress[i], 0, allocate_size);
 							}
-	 						status = GevStartTransfer( handle, -1);
+							status = GevStartTransfer( handle, -1);
 							if (status != 0) printf("Error starting grab - 0x%x  or %d\n", status, status); 
-            }
+			            }
 					
-		            // Save image
-            if ((c == '@'))
-		        {
+						// Save image
+						if ((c == '@'))
+						{
 							char filename[128] = {0};
 							int ret = -1;
 							uint32_t saveFormat = format;
@@ -627,25 +625,23 @@ int CameraStart()
 								free(bufToSave);
 							}
 						
-		        }
-		        if (c == '?')
-		        {
-	           PrintMenu();
-		        }
-
-		        if ((c == 0x1b) || (c == 'q') || (c == 'Q'))
-		        {
+						}
+						if (c == '?')
+						{
+							PrintMenu();
+						}
+		        		if ((c == 0x1b) || (c == 'q') || (c == 'Q'))
+		        		{
 							GevStopTransfer(handle);
-		          done = TRUE;
+		          			done = TRUE;
 							context.exit = TRUE;
-		   				pthread_join( tid, NULL);      
-		        }
-		      }
+							pthread_join( tid, NULL);
+						}
+					}
 #endif
 					GevAbortTransfer(handle);
 					status = GevFreeTransfer(handle);
 					DestroyDisplayWindow(View);
-
 
 					for (i = 0; i < numBuffers; i++)
 					{	
@@ -665,17 +661,12 @@ int CameraStart()
 			}
 		}
 	}
-
     // Close down the API.
     GevApiUninitialize();
-
     // Close socket API
     _CloseSocketAPI ();	// must close API even on error
-
-
 	//printf("Hit any key to exit\n");
 	//kbhit();
-
 }
 
 
@@ -730,100 +721,6 @@ void CameraStop()
 //   }
 // }
 
-// void button_clicked6(GtkWidget * widget, gpointer data)
-// {
-//   int i;
-//   for (i = 0; i < numBuffers; i++)
-//   {
-//     memset(bufAddress[i], 0, allocate_size);
-//   }
-
-//   status = GevStartTransfer( handle, (UINT32)1);
-//   if (status != 0) printf("Error starting grab - 0x%x  or %d\n", status, status); 
-// }
-
-void button_clicked7(GtkWidget * widget, gpointer data)
-{
-  char filename[128] = {0};
-  int ret = -1;
-  uint32_t saveFormat = format;
-  void *bufToSave = m_latestBuffer;
-  int allocate_conversion_buffer = 0;
-
-  // Make sure we have data to save.
-  if ( m_latestBuffer != NULL )
-  {
-    uint32_t component_count = 1;
-    UINT32 convertedFmt = 0;
-    
-    // Bayer conversion enabled for save image to file option.
-    //
-    // Get the converted pixel type received from the API that is 
-    //	based on the pixel type output from the camera.
-    // (Packed formats are automatically unpacked - unless in "passthru" mode.)
-    //
-    convertedFmt = GevGetConvertedPixelType( 0, format);
-    
-    if ( GevIsPixelTypeBayer( convertedFmt ) && ENABLE_BAYER_CONVERSION )
-    {
-      int img_size = 0;
-      int img_depth = 0;
-      uint8_t fill = 0;
-      
-      // Bayer will be converted to RGB.
-      saveFormat = GevGetBayerAsRGBPixelType(convertedFmt);
-      
-      // Convert the image to RGB.
-      img_depth = GevGetPixelDepthInBits(saveFormat);
-      component_count = GevGetPixelComponentCount(saveFormat);
-      img_size = width * height * component_count* ((img_depth + 7)/8);
-      bufToSave = malloc(img_size);  
-      fill = (component_count == 4) ? 0xFF : 0;  // Alpha if needed.
-      memset( bufToSave, fill, img_size);
-      allocate_conversion_buffer = 1;
-      
-      // Convert the Bayer to RGB	
-      ConvertBayerToRGB( 0, height, width, convertedFmt, m_latestBuffer, saveFormat, bufToSave);
-
-    }
-    else
-    {
-      saveFormat = convertedFmt;
-      allocate_conversion_buffer = 0;
-    }
-    
-    // Generate a file name from the unique base name.
-    _GetUniqueFilename(filename, (sizeof(filename)-5), uniqueName);
-    
-  #if defined(LIBTIFF_AVAILABLE)
-    // Add the file extension we want.
-    strncat( filename, ".tif", sizeof(filename));
-    
-    // Write the file (from the latest buffer acquired).
-    ret = Write_GevImage_ToTIFF( filename, width, height, saveFormat, bufToSave);								
-    if (ret > 0)
-    {
-      printf("Image saved as : %s : %d bytes written\n", filename, ret); 
-    }
-    else
-    {
-      printf("Error %d saving image\n", ret);
-    }
-  #else
-    printf("*** Library libtiff not installed ***\n");
-  #endif
-  }
-  else
-  {
-    printf("No image buffer has been acquired yet !\n");
-  }
-
-  if (allocate_conversion_buffer)
-  {
-    free(bufToSave);
-  }
-}
-
 class ExampleWindow : public Gtk::Window
 {
 public:
@@ -843,6 +740,7 @@ protected:
   void on_button_clicked4();
   void on_button_clicked5();
   void on_button_clicked6();
+  void on_button_clicked7();
 
 
   //Child widgets:
@@ -889,6 +787,7 @@ protected:
   Gtk::Button m_button4;
   Gtk::Button m_button5;
   Gtk::Button m_button6;
+  Gtk::Button m_button7;
 
 
   //Child widgets:
@@ -947,7 +846,8 @@ ExampleWindow::ExampleWindow()
   m_button3("GetCameraInterfaceOptions"),
   m_button4("Constant Grab"),
   m_button5("Constant Grab Stop"),
-  m_button6("One Shot")
+  m_button6("One Shot"),
+  m_button7("Save")
 {
   set_title("range controls");
   set_default_size(300, 900);
@@ -1039,6 +939,7 @@ ExampleWindow::ExampleWindow()
   m_VBox_Top.pack_start(m_button4, Gtk::PACK_SHRINK);
   m_VBox_Top.pack_start(m_button5, Gtk::PACK_SHRINK);
   m_VBox_Top.pack_start(m_button6, Gtk::PACK_SHRINK);
+  m_VBox_Top.pack_start(m_button7, Gtk::PACK_SHRINK);
   m_VBox_Top.pack_start(m_Separator5, Gtk::PACK_SHRINK);
   m_VBox_Top.pack_start(m_Button_Quit, Gtk::PACK_SHRINK);
   
@@ -1101,6 +1002,16 @@ ExampleWindow::ExampleWindow()
               &ExampleWindow::on_button_clicked6) );
   m_button6.set_border_width(10);
 
+
+  m_button7.set_can_default();
+  m_button7.grab_default();
+  //m_button.add_pixlabel("info.xpm", "cool button");
+
+  m_button7.signal_clicked().connect( sigc::mem_fun(*this,
+              &ExampleWindow::on_button_clicked7) );
+  m_button7.set_border_width(10);
+
+
   //Add the TreeView, inside a ScrolledWindow, with the button underneath:
   m_ScrolledWindow.add(m_TextView);
 
@@ -1114,6 +1025,7 @@ ExampleWindow::ExampleWindow()
 
 ExampleWindow::~ExampleWindow()
 {
+	CameraStop();
 }
 
 void ExampleWindow::on_checkbutton_toggled()
@@ -1222,7 +1134,6 @@ void ExampleWindow::on_button_clicked5()
   GevStopTransfer(handle);
 }
 
-
 void ExampleWindow::on_button_clicked6()
 {
   // One Shot.
@@ -1234,4 +1145,86 @@ void ExampleWindow::on_button_clicked6()
 
   status = GevStartTransfer( handle, (UINT32)1);
   if (status != 0) printf("Error starting grab - 0x%x  or %d\n", status, status); 
+}
+
+void ExampleWindow::on_button_clicked7()
+{
+  char filename[128] = {0};
+  int ret = -1;
+  uint32_t saveFormat = format;
+  void *bufToSave = m_latestBuffer;
+  int allocate_conversion_buffer = 0;
+
+  // Make sure we have data to save.
+  if ( m_latestBuffer != NULL )
+  {
+    uint32_t component_count = 1;
+    UINT32 convertedFmt = 0;
+    
+    // Bayer conversion enabled for save image to file option.
+    //
+    // Get the converted pixel type received from the API that is 
+    //	based on the pixel type output from the camera.
+    // (Packed formats are automatically unpacked - unless in "passthru" mode.)
+    //
+    convertedFmt = GevGetConvertedPixelType( 0, format);
+    
+    if ( GevIsPixelTypeBayer( convertedFmt ) && ENABLE_BAYER_CONVERSION )
+    {
+      int img_size = 0;
+      int img_depth = 0;
+      uint8_t fill = 0;
+      
+      // Bayer will be converted to RGB.
+      saveFormat = GevGetBayerAsRGBPixelType(convertedFmt);
+      
+      // Convert the image to RGB.
+      img_depth = GevGetPixelDepthInBits(saveFormat);
+      component_count = GevGetPixelComponentCount(saveFormat);
+      img_size = width * height * component_count* ((img_depth + 7)/8);
+      bufToSave = malloc(img_size);  
+      fill = (component_count == 4) ? 0xFF : 0;  // Alpha if needed.
+      memset( bufToSave, fill, img_size);
+      allocate_conversion_buffer = 1;
+      
+      // Convert the Bayer to RGB	
+      ConvertBayerToRGB( 0, height, width, convertedFmt, m_latestBuffer, saveFormat, bufToSave);
+
+    }
+    else
+    {
+      saveFormat = convertedFmt;
+      allocate_conversion_buffer = 0;
+    }
+    
+    // Generate a file name from the unique base name.
+    _GetUniqueFilename(filename, (sizeof(filename)-5), uniqueName);
+    
+  #if defined(LIBTIFF_AVAILABLE)
+    // Add the file extension we want.
+    strncat( filename, ".tif", sizeof(filename));
+    
+    // Write the file (from the latest buffer acquired).
+    ret = Write_GevImage_ToTIFF( filename, width, height, saveFormat, bufToSave);								
+    if (ret > 0)
+    {
+      printf("Image saved as : %s : %d bytes written\n", filename, ret); 
+    }
+    else
+    {
+      printf("Error %d saving image\n", ret);
+    }
+  #else
+    printf("*** Library libtiff not installed ***\n");
+  #endif
+  }
+  else
+  {
+    printf("No image buffer has been acquired yet !\n");
+  }
+
+  if (allocate_conversion_buffer)
+  {
+    free(bufToSave);
+  }
 }

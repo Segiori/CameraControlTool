@@ -52,9 +52,9 @@ OBJS= gui.o \
       X_Display_utils.o
 
 genicam_cpp_demo : $(OBJS)
-	$(CC) -g $(ARCH_LINK_OPTIONS) -o genicam_cpp_demo $(OBJS) $(LCLLIBS) $(GENICAM_LIBS) $(GTKMMOPTION) -L$(ARCHLIBDIR) -lstdc++
+	$(CC) -g $(ARCH_LINK_OPTIONS) -o cameraControlTool $(OBJS) $(LCLLIBS) $(GENICAM_LIBS) $(GTKMMOPTION) -L$(ARCHLIBDIR) -lstdc++
 
 clean:
-	rm *.o genicam_cpp_demo 
+	rm *.o cameraControlTool
 
 
